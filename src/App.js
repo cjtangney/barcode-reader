@@ -1,25 +1,36 @@
 import React, { Component } from 'react';
+import Papa from 'papaparse';
 import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    let csvFile = require('./data/ski-nh-barcodes-all-access.csv');
+    Papa.parse(csvFile, {
+      header: true,
+      download: true,
+      skipEmptyLines: true,
+      complete: (result) => {
+        const data = result.data;
+        this.parseData(data);
+      }
+    });
+  }
+  parseData = (csvData) => {
+    if(csvData !== undefined){
+
+      let codes = [];
+      codes = csvData;
+
+      console.log(codes);   
+    }
+  }
   render() {
     return (
-      <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+      <div>
+        
       </div>
     );
   }

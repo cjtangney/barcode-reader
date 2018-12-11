@@ -2,6 +2,40 @@ import React, { Component } from 'react';
 import Papa from 'papaparse';
 import './App.css';
 
+//move to file
+class BarcodeList {
+  constructor(name, serials, totalQty, redeemQty){
+    this.name = name;
+    this.serials = serials;
+    this.totalQty = totalQty;
+    this.redeemQty = redeemQty;
+  }
+  getName = () => {
+    return this.name;
+  }
+  getQty = () => {
+    return this.totalQty;
+  }
+  getRedeemed = () => {
+    return this.redeemQty;
+  }
+}
+
+//move to file
+class SerialNumber {
+  constructor(id, redeemed, dateRedeemed){
+    this.id = id;
+    this.redeemed = redeemed;
+    this.dateRedeemed = dateRedeemed;
+  }
+  getSerial = () => {
+    return this.id;
+  }
+  getStatus = () => {
+
+  }
+}
+
 class App extends Component {
   //app will keep track of the lists that have been loaded
   constructor(props) {
@@ -32,27 +66,14 @@ class App extends Component {
   */
   parseData = (csvData, fileName) => {
     if(csvData !== undefined){
-      //define the BarcodeList object
-      class BarcodeList {
-        constructor(name, serials, totalQty, redeemQty){
-          this.name = name;
-          this.serials = serials;
-          this.totalQty = totalQty;
-          this.redeemQty = redeemQty;
-        }
-        getName = () => {
-          return this.name;
-        }
-        getQty = () => {
-          return this.totalQty;
-        }
-        getRedeemed = () => {
-          return this.redeemQty;
-        }
-      }
+      //create array of SerialNumber objects
+      let serialList = [];
+      csvData.forEach(function(record){
+        serialList.push(new SerialNumber(record[0], false, ''));
+      });
 
-      //add the new BarcodeList object to the state
-      let tempList = new BarcodeList(fileName, csvData, 0, 0);
+      //add the new BarcodeList object to the state, stick the SerialNumber array in there
+      let tempList = new BarcodeList(fileName, serialList, 0, 0);
       let newList = this.state.list.concat(tempList);
 
       this.setState({
@@ -60,6 +81,7 @@ class App extends Component {
       });
     }
   }
+  //search functions should be in a threadworker or something
   updateSearchKey = (key) => {
     this.setState({
       searchKey: key,
@@ -74,10 +96,9 @@ class App extends Component {
     let key = this.state.searchKey;
     for(let i = 0; i < this.state.list.length; i++){
       let list = this.state.list[i];
-      console.log(list);
       for(let k = 0; k < list.serials.length; k++){
-        let serial = list.serials[k];
-        if (serial[0] === key){
+        let serial = list.serials[k].id;
+        if (serial === key){
           alert('key found');
           return;
         }
@@ -89,9 +110,9 @@ class App extends Component {
       <div>
         <div>
           <input type="file" id="serial-file-input" accept=".csv" onChange={ event => this.loadData(event.target.files[0]) } />
-          <input type="text" id="search-key-input" onChange={ event => this.updateSearchKey(event.target.value) }/>
         </div>
         <div>
+          <input type="text" id="search-key-input" onChange={ event => this.updateSearchKey(event.target.value) }/>
           <button id="search-button" onClick={ event => this.findVoucher() }>Find Voucher</button>
         </div>
       </div>

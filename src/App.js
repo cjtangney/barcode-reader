@@ -100,6 +100,8 @@ class App extends Component {
         let serial = list.serials[k].id;
         if (serial === key){
           alert('key found');
+          //update the serial so it remembers it has been redeemed
+          list.serials[k].redeemed = true;
           return;
         }
       }
@@ -107,13 +109,18 @@ class App extends Component {
   }
   render() {
     return (
-      <div>
-        <div>
-          <input type="file" id="serial-file-input" accept=".csv" onChange={ event => this.loadData(event.target.files[0]) } />
-        </div>
-        <div>
-          <input type="text" id="search-key-input" onChange={ event => this.updateSearchKey(event.target.value) }/>
-          <button id="search-button" onClick={ event => this.findVoucher() }>Find Voucher</button>
+      <div className='container'>
+        <div className='columns col-6 col-mx-auto'>
+          <div className='column'>
+            <label htmlFor='serial-file-input' style={{ border: '1px solid #ccc', display: 'inline-block', padding: '6px 12px', cursor: 'pointer' }}>
+              <i className='fa fa-cloud-upload'></i> Custom Upload
+            </label>
+            <input type='file' id='serial-file-input' accept='.csv' onChange={ event => this.loadData(event.target.files[0]) } style={{ display: 'none' }}/>
+          </div>
+          <div className='column col-6 col-mx-auto'>
+            <input type='text' id='search-key-input' onChange={ event => this.updateSearchKey(event.target.value) }/>
+            <button id='search-button' onClick={ event => this.findVoucher() }>Find Voucher</button>
+          </div>
         </div>
       </div>
     );

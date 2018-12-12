@@ -107,6 +107,11 @@ class App extends Component {
       }
     }
   }
+  saveState = () => {
+    let json = JSON.stringify(this.state);
+    
+    //console.log(json);
+  }
   render() {
     return (
       <div className='container'>
@@ -120,6 +125,9 @@ class App extends Component {
           <div className='column col-6 col-mx-auto'>
             <input type='text' id='search-key-input' onChange={ event => this.updateSearchKey(event.target.value) }/>
             <button id='search-button' onClick={ event => this.findVoucher() }>Find Voucher</button>
+          </div>
+          <div className='column col-12 col-mx-auto'>
+            <button id='save-button' onClick={ event => this.saveState() }>Save State</button>
           </div>
         </div>
       </div>

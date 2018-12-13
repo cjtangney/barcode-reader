@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import Papa from 'papaparse';
+import { UploadModal, RedeemModal } from './components/Modal';
 import './App.css';
 
-//move to file
+//move to class file
 class BarcodeList {
   constructor(name, serials, totalQty, redeemQty){
     this.name = name;
@@ -21,7 +22,7 @@ class BarcodeList {
   }
 }
 
-//move to file
+//move to class file
 class SerialNumber {
   constructor(id, redeemed, dateRedeemed){
     this.id = id;
@@ -44,7 +45,12 @@ class App extends Component {
     this.state = {
       list: [],
       searchKey: '',
+      modalTitle: '',
+      modalBody: '',
     }
+  }
+  componentDidMount() {
+    this.hydrateStateWithLocalStorage();
   }
   //load the data, then hand it off to be parsed
   loadData = (e) => {
@@ -56,6 +62,7 @@ class App extends Component {
       complete: (result) => {
         const data = result.data;
         this.parseData(data, e.name);
+        document.getElementById('upload-modal').classList.remove('active');
       }
     });
   }
@@ -102,34 +109,67 @@ class App extends Component {
           alert('key found');
           //update the serial so it remembers it has been redeemed
           list.serials[k].redeemed = true;
-          return;
+          break;
+        }
+      }
+    }
+    document.getElementById('search-key-input').value = ''
+    this.setState({
+      searchKey: '',
+    });
+    document.getElementById('redeem-modal').classList.remove('active');
+  }
+  saveState = () => {
+    let json = JSON.stringify(this.state.list);
+    // update localStorage
+    localStorage.setItem('list', json);
+  }
+  hydrateStateWithLocalStorage = () => {
+    // for all items in state
+    for (let key in this.state) {
+      // if the key exists in localStorage
+      if (localStorage.hasOwnProperty(key)) {
+        // get the key's value from localStorage
+        let value = localStorage.getItem(key);
+
+        // parse the localStorage string and setState
+        try {
+          value = JSON.parse(value);
+          this.setState({ [key]: value });
+        } catch (e) {
+          // handle empty string
+          this.setState({ [key]: value });
         }
       }
     }
   }
-  saveState = () => {
-    let json = JSON.stringify(this.state);
-    
-    //console.log(json);
+  closeModal = (e) => {
+    e.preventDefault();
+    let elements = document.getElementsByClassName('modal');
+    for (var i = 0; i < elements.length; i++) {
+      elements[i].classList.remove('active');
+    }
   }
   render() {
     return (
       <div className='container'>
-        <div className='columns col-6 col-mx-auto'>
-          <div className='column'>
-            <label htmlFor='serial-file-input' style={{ border: '1px solid #ccc', display: 'inline-block', padding: '6px 12px', cursor: 'pointer' }}>
-              <i className='fa fa-cloud-upload'></i> Custom Upload
-            </label>
-            <input type='file' id='serial-file-input' accept='.csv' onChange={ event => this.loadData(event.target.files[0]) } style={{ display: 'none' }}/>
-          </div>
-          <div className='column col-6 col-mx-auto'>
-            <input type='text' id='search-key-input' onChange={ event => this.updateSearchKey(event.target.value) }/>
-            <button id='search-button' onClick={ event => this.findVoucher() }>Find Voucher</button>
-          </div>
-          <div className='column col-12 col-mx-auto'>
-            <button id='save-button' onClick={ event => this.saveState() }>Save State</button>
+        <div className='columns hero bg-dark text-center' style={{'marginTop': '15em'}}> 
+          <div className='hero-body'>
+            <div className='columns'>
+              <div className='column col-4 col-mx-auto'>
+                <button className='btn btn-primary' style={{'minWidth': '12em', 'minHeight': '5em'}} id='upload-button' onClick={ event => document.getElementById('upload-modal').classList.add('active') }>Upload List</button>
+              </div>
+              <div className='column col-4 col-mx-auto'>
+                <button className='btn btn-primary' style={{'minWidth': '12em', 'minHeight': '5em'}} id='redeem-button' onClick={ event => document.getElementById('redeem-modal').classList.add('active') }>Redeem Voucher</button>
+              </div>
+              <div className='column col-4 col-mx-auto'>
+                <button className='btn btn-primary' style={{'minWidth': '12em', 'minHeight': '5em'}} id='save-button' onClick={ event => this.saveState() }>Save State</button>
+              </div>
+            </div>
           </div>
         </div>
+        <UploadModal loadData={this.loadData} closeModal={this.closeModal} />
+        <RedeemModal updateSearchKey={this.updateSearchKey} findVoucher={this.findVoucher} closeModal={this.closeModal} />
       </div>
     );
   }

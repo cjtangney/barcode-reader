@@ -101,23 +101,31 @@ class App extends Component {
   }
   serialSearch = () => {
     let key = this.state.searchKey;
+    let keyFound = false;
     for(let i = 0; i < this.state.list.length; i++){
       let list = this.state.list[i];
       for(let k = 0; k < list.serials.length; k++){
         let serial = list.serials[k].id;
         if (serial === key){
-          alert('key found');
-          //update the serial so it remembers it has been redeemed
-          list.serials[k].redeemed = true;
-          break;
+          if(list.serials[k].redeemed){ 
+            alert('this voucher has been previously redeemed.');
+            keyFound = true; 
+            break; 
+          }else if(!list.serials[k].redeemed){
+            alert('this voucher is valid');
+            list.serials[k].redeemed = true;
+            keyFound = true;
+            this.setState({
+              searchKey: '',
+            });
+            document.getElementById('redeem-modal').classList.remove('active');
+            break;
+          }
         }
       }
     }
+    if(!keyFound){ alert('this voucher is invalid.'); }
     document.getElementById('search-key-input').value = ''
-    this.setState({
-      searchKey: '',
-    });
-    document.getElementById('redeem-modal').classList.remove('active');
   }
   saveState = () => {
     let json = JSON.stringify(this.state.list);
@@ -156,13 +164,13 @@ class App extends Component {
         <div className='columns hero bg-dark text-center' style={{'marginTop': '15em'}}> 
           <div className='hero-body'>
             <div className='columns'>
-              <div className='column col-4 col-mx-auto'>
+              <div className='column col-3 col-mx-auto'>
                 <button className='btn btn-primary' style={{'minWidth': '12em', 'minHeight': '5em'}} id='upload-button' onClick={ event => document.getElementById('upload-modal').classList.add('active') }>Upload List</button>
               </div>
-              <div className='column col-4 col-mx-auto'>
-                <button className='btn btn-primary' style={{'minWidth': '12em', 'minHeight': '5em'}} id='redeem-button' onClick={ event => document.getElementById('redeem-modal').classList.add('active') }>Redeem Voucher</button>
+              <div className='column col-6 col-mx-auto'>
+                <button className='btn btn-success' style={{'minWidth': '24em', 'minHeight': '5em'}} id='redeem-button' onClick={ event => document.getElementById('redeem-modal').classList.add('active') }>Redeem Voucher</button>
               </div>
-              <div className='column col-4 col-mx-auto'>
+              <div className='column col-3 col-mx-auto'>
                 <button className='btn btn-primary' style={{'minWidth': '12em', 'minHeight': '5em'}} id='save-button' onClick={ event => this.saveState() }>Save State</button>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Papa from 'papaparse';
+import Axios from 'axios';
 import { UploadModal, RedeemModal } from './components/Modal';
-import './App.css';
 
 //move to class file
 class BarcodeList {
@@ -49,9 +49,20 @@ class App extends Component {
       modalBody: '',
     }
   }
-  componentDidMount() {
-    this.hydrateStateWithLocalStorage();
+  /*
+  async componentDidMount() {
+    let roomResponse = await fetch("http://localhost:1337/rooms");
+    let suiteResponse = await fetch("http://localhost:1337/suites");
+    if(!roomResponse.ok) return;
+    if(!suiteResponse.ok) return;
+
+    let rooms = await roomResponse.json();
+    this.setState({ loading: false, rooms: rooms });
+
+    let suites = await suiteResponse.json();
+    this.setState({suites: suites});
   }
+  */
   //load the data, then hand it off to be parsed
   loadData = (e) => {
     let csvFile = e;
@@ -128,27 +139,13 @@ class App extends Component {
     document.getElementById('search-key-input').value = ''
   }
   saveState = () => {
-    let json = JSON.stringify(this.state.list);
-    // update localStorage
-    localStorage.setItem('list', json);
-  }
-  hydrateStateWithLocalStorage = () => {
-    // for all items in state
-    for (let key in this.state) {
-      // if the key exists in localStorage
-      if (localStorage.hasOwnProperty(key)) {
-        // get the key's value from localStorage
-        let value = localStorage.getItem(key);
-
-        // parse the localStorage string and setState
-        try {
-          value = JSON.parse(value);
-          this.setState({ [key]: value });
-        } catch (e) {
-          // handle empty string
-          this.setState({ [key]: value });
-        }
-      }
+    for(let i = 0; i < this.state.list.length; i++){
+      Axios.post('api/putData', {
+        name: this.state.list[i].name,
+        serials: this.state.list[i].serials,
+        totalQty: this.state.list[i].totalQty,
+        redeemQty: this.state.list[i].redeemQty
+      });
     }
   }
   closeModal = (e) => {
@@ -161,7 +158,13 @@ class App extends Component {
   render() {
     return (
       <div className='container'>
-        <div className='columns hero bg-dark text-center' style={{'marginTop': '15em'}}> 
+        <div className='panel columns'>
+          <div className='column col-12 text-center' style={{'marginTop': '5em'}}>
+            <h1>Ragged Mountain Resort Voucher Redemption Applicaton</h1>
+            <p>To redeem a voucher, select the button below. When prompted, scan the barcode into the provided text field and hit search.</p>
+          </div>
+        </div>
+        <div className='columns hero bg-dark text-center' style={{'marginTop': '10em'}}> 
           <div className='hero-body'>
             <div className='columns'>
               <div className='column col-3 col-mx-auto'>

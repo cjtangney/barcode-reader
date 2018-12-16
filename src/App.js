@@ -55,6 +55,10 @@ class App extends Component {
       this.setState({ list: lists, loading: false, });
     });
   }
+  componentWillUnmount() {
+    console.log('asdf');
+    this.saveState();
+  }
   loadData = (file, name) => {
     if(file && name){
       let csvFile = file;
@@ -105,6 +109,7 @@ class App extends Component {
         this.setState({
           list: newList,
         });
+        this.saveState(tempList);
       }
     }
   }
@@ -156,18 +161,14 @@ class App extends Component {
       this.setState({ searchKey: '', }); 
     document.getElementById('search-key-input').value = '';
   }
-  saveState = () => {
-    let totalLists = this.state.list.length;
-    let i;
-    for(i = 0; i < totalLists; i++){
-      Axios.post('api/putData', {
-        name: this.state.list[i].name,
-        fileName: this.state.list[i].fileName,
-        serials: this.state.list[i].serials,
-        totalQty: this.state.list[i].totalQty,
-        redeemQty: this.state.list[i].redeemQty
-      });
-    }
+  saveState = (list) => {
+    Axios.post('api/putData', {
+      name: list.name,
+      fileName: list.fileName,
+      serials: list.serials,
+      totalQty: list.totalQty,
+      redeemQty: list.redeemQty
+    });
   }
   closeModal = (e) => {
     e.preventDefault();
@@ -189,13 +190,10 @@ class App extends Component {
           <div className='hero-body'>
             <div className='columns'>
               <div className='column col-3 col-mx-auto'>
-                <button className='btn btn-primary' style={{'minWidth': '12em', 'minHeight': '5em'}} id='upload-button' onClick={ event => document.getElementById('upload-modal').classList.add('active') }>Upload List</button>
+                <button className='btn btn-primary' id='upload-button' onClick={ event => document.getElementById('upload-modal').classList.add('active') }>Upload List</button>
               </div>
-              <div className='column col-6 col-mx-auto'>
-                <button className='btn btn-success' style={{'minWidth': '24em', 'minHeight': '5em'}} id='redeem-button' onClick={ event => document.getElementById('redeem-modal').classList.add('active') }>Redeem Voucher</button>
-              </div>
-              <div className='column col-3 col-mx-auto'>
-                <button className='btn btn-primary' style={{'minWidth': '12em', 'minHeight': '5em'}} id='save-button' onClick={ event => this.saveState() }>Save State</button>
+              <div className='column col-9 col-mx-auto'>
+                <button className='btn btn-success' id='redeem-button' onClick={ event => document.getElementById('redeem-modal').classList.add('active') }>Redeem Voucher</button>
               </div>
             </div>
           </div>

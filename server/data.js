@@ -5,11 +5,14 @@ const Schema = mongoose.Schema;
 const ListSchema = new Schema(
   {
     name: String,
+    fileName: String,
     serials: Array,
     totalQty: Number,
-    redeemQty: Number
+    redeemQty: Number,
   },
-  { timestamps: true }
+  { 
+  	timestamps: true,
+  }
 );
 
 // export the new Schema so we could modify it using Node.js

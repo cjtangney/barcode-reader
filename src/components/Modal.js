@@ -17,13 +17,20 @@ class UploadModal extends Component {
 			    </div>
 			    <div className='modal-body'>
 			      <div className='content'>
+			      	<label className='text-center' htmlFor='serial-list-name-input'>
+	              Enter list name:
+	            </label>
+	            <input type='text' id='serial-list-name-input' style={{ width: '100%', marginBottom: '1em' }}/>
 			        <label className='text-center' htmlFor='serial-file-input' style={{ border: '1px solid #ccc', display: 'inline-block', padding: '2em 4em', cursor: 'pointer', 'width': '100%' }}>
 	              <i className='fa fa-cloud-upload'></i> Upload List
 	            </label>
-	            <input type='file' id='serial-file-input' accept='.csv' onChange={ event => (this.props.loadData(event.target.files[0])) } style={{ display: 'none' }}/>
+	            <input type='file' id='serial-file-input' accept='.csv' style={{ display: 'none' }}/>
 			      </div>
 			    </div>
 			    <div className='modal-footer'>
+			    	<button className='btn' id='load-button' onClick={ event => (
+			    		this.props.loadData(document.getElementById('serial-file-input').files[0], document.getElementById('serial-list-name-input').value)
+			    	)} style={{ 'marginTop': '1em' }}>Load List</button>
 			    </div>
 			  </div>
 			</div>

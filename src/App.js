@@ -5,8 +5,9 @@ import { UploadModal, RedeemModal } from './components/Modal';
 
 //move to class file
 class BarcodeList {
-  constructor(name, serials, totalQty, redeemQty){
+  constructor(name, fileName, serials, totalQty, redeemQty){
     this.name = name;
+    this.fileName = fileName;
     this.serials = serials;
     this.totalQty = totalQty;
     this.redeemQty = redeemQty;
@@ -32,9 +33,6 @@ class SerialNumber {
   getSerial = () => {
     return this.id;
   }
-  getStatus = () => {
-
-  }
 }
 
 class App extends Component {
@@ -47,42 +45,41 @@ class App extends Component {
       searchKey: '',
       modalTitle: '',
       modalBody: '',
+      loading: true,
     }
   }
-  /*
   async componentDidMount() {
-    let roomResponse = await fetch("http://localhost:1337/rooms");
-    let suiteResponse = await fetch("http://localhost:1337/suites");
-    if(!roomResponse.ok) return;
-    if(!suiteResponse.ok) return;
-
-    let rooms = await roomResponse.json();
-    this.setState({ loading: false, rooms: rooms });
-
-    let suites = await suiteResponse.json();
-    this.setState({suites: suites});
-  }
-  */
-  //load the data, then hand it off to be parsed
-  loadData = (e) => {
-    let csvFile = e;
-    Papa.parse(csvFile, {
-      header: false,
-      download: true,
-      skipEmptyLines: true,
-      complete: (result) => {
-        const data = result.data;
-        this.parseData(data, e.name);
-        document.getElementById('upload-modal').classList.remove('active');
-      }
+    Axios.get('/api/getData',)
+    .then(res=> {
+      let lists = res.data.data;
+      this.setState({ list: lists, loading: false, });
     });
+  }
+  loadData = (file, name) => {
+    if(file && name){
+      let csvFile = file;
+      Papa.parse(csvFile, {
+        header: false,
+        download: true,
+        skipEmptyLines: true,
+        complete: (result) => {
+          const data = result.data;
+          this.parseData(data, file.name, name);
+          document.getElementById('upload-modal').classList.remove('active');
+        }
+      });
+    } else { 
+      if(!name && !file){ alert('both fields required'); }
+      else if(!file){ alert('please select a file'); }
+      else if(!name){ alert('enter a list title'); }
+    }
   }
   //parse data into list objects, then stick it into the app state
   /*
     -> you will need to store the app state (specifically list information) in some kind of external file or database
     -> you will need to set up a way to confirm that the list you are loading is not already in the app's "memory"
   */
-  parseData = (csvData, fileName) => {
+  parseData = (csvData, fileName, name) => {
     if(csvData !== undefined){
       //create array of SerialNumber objects
       let serialList = [];
@@ -91,15 +88,26 @@ class App extends Component {
       });
 
       //add the new BarcodeList object to the state, stick the SerialNumber array in there
-      let tempList = new BarcodeList(fileName, serialList, 0, 0);
-      let newList = this.state.list.concat(tempList);
-
-      this.setState({
-        list: newList,
-      });
+      let tempList = new BarcodeList(name, fileName, serialList, 0, 0);
+      let listExists = false;
+      let i;
+      for(i = 0; i < this.state.list.length; i++){
+        if(tempList.fileName === this.state.list[i].fileName){ 
+          alert('this list exists already');
+          document.getElementById('serial-list-name-input').value = '';
+          listExists = true;
+          return;
+        }
+      }
+      if(!listExists){
+        document.getElementById('serial-list-name-input').value = '';
+        let newList = this.state.list.concat(tempList);
+        this.setState({
+          list: newList,
+        });
+      }
     }
   }
-  //search functions should be in a threadworker or something
   updateSearchKey = (key) => {
     this.setState({
       searchKey: key,
@@ -110,10 +118,17 @@ class App extends Component {
       this.serialSearch() : 
       alert('no data has been loaded');
   }
+  //search functions should be in a threadworker or something
   serialSearch = () => {
     let key = this.state.searchKey;
     let keyFound = false;
-    for(let i = 0; i < this.state.list.length; i++){
+    let today = new Date();
+    let day = today.getDate();
+    let month = today.getMonth()+1;
+    let year = today.getFullYear();
+    today = day + '/' + month + '/' + year;
+    let i;
+    for(i = 0; i < this.state.list.length; i++){
       let list = this.state.list[i];
       for(let k = 0; k < list.serials.length; k++){
         let serial = list.serials[k].id;
@@ -125,6 +140,7 @@ class App extends Component {
           }else if(!list.serials[k].redeemed){
             alert('this voucher is valid');
             list.serials[k].redeemed = true;
+            list.serials[k].dateRedeemed = today;
             keyFound = true;
             this.setState({
               searchKey: '',
@@ -135,13 +151,18 @@ class App extends Component {
         }
       }
     }
-    if(!keyFound){ alert('this voucher is invalid.'); }
-    document.getElementById('search-key-input').value = ''
+    (!keyFound) ? 
+      alert('this voucher is invalid.') : 
+      this.setState({ searchKey: '', }); 
+    document.getElementById('search-key-input').value = '';
   }
   saveState = () => {
-    for(let i = 0; i < this.state.list.length; i++){
+    let totalLists = this.state.list.length;
+    let i;
+    for(i = 0; i < totalLists; i++){
       Axios.post('api/putData', {
         name: this.state.list[i].name,
+        fileName: this.state.list[i].fileName,
         serials: this.state.list[i].serials,
         totalQty: this.state.list[i].totalQty,
         redeemQty: this.state.list[i].redeemQty

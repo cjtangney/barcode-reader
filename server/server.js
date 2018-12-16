@@ -24,13 +24,12 @@ db.once("open", () => console.log("connected to the database"));
 // checks if connection with the database is successful
 db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
-// (optional) only made for logging and
+// set the payload limit
 // bodyParser, parses the request body to be a readable json format
 app.use(bodyParser.urlencoded({parameterLimit: 100000, limit: '50mb', extended: true}));
 app.use(bodyParser.json({limit: '50mb', type: 'application/json'}));
 app.use(logger("dev"));
 
-// this is our get method
 // this method fetches all available data in our database
 router.get("/getData", (req, res) => {
   Data.find((err, data) => {
@@ -39,23 +38,11 @@ router.get("/getData", (req, res) => {
   });
 });
 
-// this is our update method
-// this method overwrites existing data in our database
-router.post("/updateData", (req, res) => {
-  const { id, update } = req.body;
-  Data.findOneAndUpdate(id, update, err => {
-    if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true });
-  });
-});
-
-// name, serials, totalQty, redeemQty
+// this method posts a new list to the database and updates existing ones
 router.post("/putData", (req, res) => {
   let data = new Data();
-
-  const { name, serials, totalQty, redeemQty } = req.body;
-
-  if (!name) {
+  const { name, fileName, serials, totalQty, redeemQty } = req.body;
+  if (!name || !fileName) {
     return res.json({
       success: false,
       error: "INVALID INPUTS"
@@ -64,8 +51,9 @@ router.post("/putData", (req, res) => {
   data.redeemQty = redeemQty;
   data.totalQty = totalQty;
   data.serials = serials;
+  data.fileName = fileName;
   data.name = name;
-  data.save(err => {
+  Data.findOneAndUpdate({ fileName: data.fileName }, data, {upsert: true}, function (err, data){
     if (err) return res.json({ success: false, error: err });
     return res.json({ success: true });
   });

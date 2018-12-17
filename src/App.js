@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Papa from 'papaparse';
 import Axios from 'axios';
 import { UploadModal, RedeemModal } from './components/Modal';
+import IO from 'socket.io-client';
 
 //move to class file
 class BarcodeList {
@@ -47,17 +48,23 @@ class App extends Component {
       modalBody: '',
       loading: true,
     }
-  }
-  async componentDidMount() {
-    Axios.get('/api/getData',)
-    .then(res=> {
-      let lists = res.data.data;
-      this.setState({ list: lists, loading: false, });
+
+    this.syncData = () => {
+      Axios.get('/api/getData')
+      .then(res=> {
+        let lists = res.data.data;
+        this.setState({ list: lists, loading: false, });
+      });
+    }
+
+    this.socket = IO.connect('http://localhost:3000');
+
+    this.socket.on('sync', () => {
+      this.syncData();
     });
   }
-  componentWillUnmount() {
-    console.log('asdf');
-    this.saveState();
+  async componentDidMount() {
+    this.syncData();
   }
   loadData = (file, name) => {
     if(file && name){
@@ -162,13 +169,14 @@ class App extends Component {
     document.getElementById('search-key-input').value = '';
   }
   saveState = (list) => {
-    Axios.post('api/putData', {
+    let newList = {
       name: list.name,
       fileName: list.fileName,
       serials: list.serials,
       totalQty: list.totalQty,
       redeemQty: list.redeemQty
-    });
+    }
+    Axios.post('api/putData', newList).then(this.socket.emit('update'));
   }
   closeModal = (e) => {
     e.preventDefault();

@@ -46,7 +46,7 @@ class RedeemModal extends Component {
 	}
 	render(){
 		return(
-			<div className='modal' id='redeem-modal'>
+			<div className='modal modal-lg' id='redeem-modal'>
 			  <a href='#close' className='modal-overlay' aria-label='Close' id='modal-overlay' onClick={ event => this.props.closeModal(event) }></a>
 			  <div className='modal-container'>
 			    <div className='modal-header'>

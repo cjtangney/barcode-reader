@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Papa from 'papaparse';
 import Axios from 'axios';
 import { UploadModal, RedeemModal } from './components/Modal';
+import { Toast } from './components/Toast';
 import IO from 'socket.io-client';
 
 //move to class file
@@ -50,11 +51,19 @@ class App extends Component {
     }
 
     // get all data from the back end
+    this.syncLists = () => {
+      Axios.get('/api/getData')
+      .then(res=> {
+        let lists = res.data.data;
+        this.setState({ list: lists, loading: false, });
+      });
+    }
     this.syncData = () => {
       Axios.get('/api/getData')
       .then(res=> {
         let lists = res.data.data;
         this.setState({ list: lists, loading: false, });
+        this.showToast();
       });
     }
 
@@ -62,12 +71,15 @@ class App extends Component {
     this.socket = IO.connect('http://localhost:3000');
 
     // handling socket communication
-    this.socket.on('sync', () => {
-      this.syncData();
+    this.socket.on('sync-lists', () => {
+      this.syncLists();
     });
+    this.socket.on('sync-data', () => {
+      this.syncData();
+    })
   }
   async componentDidMount() {
-    this.syncData();
+    this.syncLists();
   }
   loadData = (file, name) => {
     if(file && name){
@@ -150,7 +162,6 @@ class App extends Component {
             keyFound = true; 
             break; 
           }else if(!list.serials[k].redeemed){
-            alert('this voucher is valid');
             tempList = list;
             list.serials[k].redeemed = true;
             list.serials[k].dateRedeemed = today;
@@ -180,7 +191,7 @@ class App extends Component {
       totalQty: list.totalQty,
       redeemQty: list.redeemQty
     }
-    Axios.post('api/updateData', newList).then(this.socket.emit('update'));
+    Axios.post('api/updateData', newList).then(this.socket.emit('update-data'));
   }
   saveState = (list) => {
     let newList = {
@@ -190,7 +201,7 @@ class App extends Component {
       totalQty: list.totalQty,
       redeemQty: list.redeemQty
     }
-    Axios.post('api/putData', newList).then(this.socket.emit('update'));
+    Axios.post('api/putData', newList).then(this.socket.emit('update-list'));
   }
   closeModal = (e) => {
     e.preventDefault();
@@ -198,6 +209,15 @@ class App extends Component {
     for (var i = 0; i < elements.length; i++) {
       elements[i].classList.remove('active');
     }
+  }
+  showToast = () => {
+    let toast = document.getElementById('notify-toast');
+    toast.classList.remove('d-hide');
+    toast.classList.add('show');
+    setTimeout(function(){ 
+      toast.classList.remove('show');
+      toast.classList.add('d-hide'); 
+    }, 3000);
   }
   render() {
     return (
@@ -208,17 +228,16 @@ class App extends Component {
             <p>To redeem a voucher, select the button below. When prompted, scan the barcode into the provided text field and hit search.</p>
           </div>
         </div>
-        <div className='columns hero bg-dark text-center' style={{'marginTop': '10em'}}> 
+        {/*<button className='btn btn-primary' id='upload-button' onClick={ event => document.getElementById('upload-modal').classList.add('active') }>Upload List</button>*/}
+        <div className='columns hero bg-dark text-center' style={{'marginTop': '10em'}}>
           <div className='hero-body'>
             <div className='columns'>
-              <div className='column col-3 col-mx-auto'>
-                <button className='btn btn-primary' id='upload-button' onClick={ event => document.getElementById('upload-modal').classList.add('active') }>Upload List</button>
-              </div>
-              <div className='column col-9 col-mx-auto'>
-                <button className='btn btn-success' id='redeem-button' onClick={ event => document.getElementById('redeem-modal').classList.add('active') }>Redeem Voucher</button>
+              <div className='column col-12 col-mx-auto'>
+                <button className='btn btn-success' id='redeem-button' onClick={ event => document.getElementById('redeem-modal').classList.add('active') } style={{'padding': '2em 5em', 'height': 'auto'}}>Redeem Voucher</button>
               </div>
             </div>
           </div>
+          <Toast />
         </div>
         <UploadModal loadData={this.loadData} closeModal={this.closeModal} />
         <RedeemModal updateSearchKey={this.updateSearchKey} findVoucher={this.findVoucher} closeModal={this.closeModal} />

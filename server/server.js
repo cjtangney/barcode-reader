@@ -67,7 +67,7 @@ router.post('/putData', (req, res) => {
     if(err){
       return res.json({ success: false, error: err });
     }else{
-      req.app.get('io').emit('sync');
+      req.app.get('io').emit('sync-lists');
       return res.json({ success: true });
     }
   });
@@ -92,7 +92,7 @@ router.post('/updateData', (req, res) => {
     if(err){
       return res.json({ success: false, error: err });
     }else{
-      req.app.get('io').emit('sync');
+      req.app.get('io').emit('sync-data');
       return res.json({ success: true });
     }
   });
@@ -100,9 +100,11 @@ router.post('/updateData', (req, res) => {
 
 // watch the socket
 io.on('connection', (socket) => {
-  socket.on('update', () => {
-    console.log('updating the database');
-    io.emit('sync');
+  socket.on('update-data', () => {
+    io.emit('sync-data');
+  })
+  socket.on('update-list', () => {
+    io.emit('sync-list');
   })
   socket.on('disconnect', () => {
     console.log('user disconnected from socket');

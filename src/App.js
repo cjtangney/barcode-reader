@@ -63,7 +63,6 @@ class App extends Component {
       .then(res=> {
         let lists = res.data.data;
         this.setState({ list: lists, loading: false, });
-        this.showToast();
       });
     }
 
@@ -191,7 +190,10 @@ class App extends Component {
       totalQty: list.totalQty,
       redeemQty: list.redeemQty
     }
-    Axios.post('api/updateData', newList).then(this.socket.emit('update-data'));
+    Axios.post('api/updateData', newList).then(() => {
+      this.showToast();
+      this.socket.emit('update-data');
+    });
   }
   saveState = (list) => {
     let newList = {

@@ -63,17 +63,45 @@ router.post('/putData', (req, res) => {
   data.serials = serials;
   data.fileName = fileName;
   data.name = name;
-  req.app.io.emit('sync');
   Data.findOneAndUpdate({ fileName: data.fileName }, data, {upsert: true}, function (err, data){
-    if (err) return res.json({ success: false, error: err });
-    req.app.get('io').emit('sync');
-    return res.json({ success: true });
+    if(err){
+      return res.json({ success: false, error: err });
+    }else{
+      req.app.get('io').emit('sync');
+      return res.json({ success: true });
+    }
+  });
+});
+
+// this method updates lists
+router.post('/updateData', (req, res) => {
+  let data = new Data();
+  const { name, fileName, serials, totalQty, redeemQty } = req.body;
+  if (!name || !fileName) {
+    return res.json({
+      success: false,
+      error: 'INVALID INPUTS'
+    });
+  }
+  data.redeemQty = redeemQty;
+  data.totalQty = totalQty;
+  data.serials = serials;
+  data.fileName = fileName;
+  data.name = name;
+  Data.updateOne({ "fileName": req.body.fileName},{$set: {"serials": req.body.serials, "redeemQty": req.body.redeemQty}}, function(err, data){
+    if(err){
+      return res.json({ success: false, error: err });
+    }else{
+      req.app.get('io').emit('sync');
+      return res.json({ success: true });
+    }
   });
 });
 
 // watch the socket
 io.on('connection', (socket) => {
   socket.on('update', () => {
+    console.log('updating the database');
     io.emit('sync');
   })
   socket.on('disconnect', () => {

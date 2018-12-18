@@ -49,6 +49,7 @@ class App extends Component {
       loading: true,
     }
 
+    // get all data from the back end
     this.syncData = () => {
       Axios.get('/api/getData')
       .then(res=> {
@@ -57,8 +58,10 @@ class App extends Component {
       });
     }
 
+    // application socket
     this.socket = IO.connect('http://localhost:3000');
 
+    // handling socket communication
     this.socket.on('sync', () => {
       this.syncData();
     });
@@ -85,11 +88,7 @@ class App extends Component {
       else if(!name){ alert('enter a list title'); }
     }
   }
-  //parse data into list objects, then stick it into the app state
-  /*
-    -> you will need to store the app state (specifically list information) in some kind of external file or database
-    -> you will need to set up a way to confirm that the list you are loading is not already in the app's "memory"
-  */
+  //parse data into list objects, then stick it into the app state / backend
   parseData = (csvData, fileName, name) => {
     if(csvData !== undefined){
       //create array of SerialNumber objects
@@ -134,12 +133,13 @@ class App extends Component {
   serialSearch = () => {
     let key = this.state.searchKey;
     let keyFound = false;
+    let keyValid = false;
     let today = new Date();
     let day = today.getDate();
     let month = today.getMonth()+1;
     let year = today.getFullYear();
     today = day + '/' + month + '/' + year;
-    let i;
+    let i, tempList;
     for(i = 0; i < this.state.list.length; i++){
       let list = this.state.list[i];
       for(let k = 0; k < list.serials.length; k++){
@@ -151,9 +151,12 @@ class App extends Component {
             break; 
           }else if(!list.serials[k].redeemed){
             alert('this voucher is valid');
+            tempList = list;
             list.serials[k].redeemed = true;
             list.serials[k].dateRedeemed = today;
+            list.redeemQty++;
             keyFound = true;
+            keyValid = true;
             this.setState({
               searchKey: '',
             });
@@ -163,10 +166,21 @@ class App extends Component {
         }
       }
     }
-    (!keyFound) ? 
-      alert('this voucher is invalid.') : 
-      this.setState({ searchKey: '', }); 
+    if(!keyFound){
+      alert('this voucher is invalid.')
+    }else if (keyFound && keyValid) this.updateState(tempList);
+    this.setState({ searchKey: '', }); 
     document.getElementById('search-key-input').value = '';
+  }
+  updateState = (list) => {
+    let newList = {
+      name: list.name,
+      fileName: list.fileName,
+      serials: list.serials,
+      totalQty: list.totalQty,
+      redeemQty: list.redeemQty
+    }
+    Axios.post('api/updateData', newList).then(this.socket.emit('update'));
   }
   saveState = (list) => {
     let newList = {

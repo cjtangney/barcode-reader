@@ -1,8 +1,12 @@
 import React, { Component } from 'react';
 import Papa from 'papaparse';
 import Axios from 'axios';
-import { UploadModal, RedeemModal } from './components/Modal';
+
 import { Toast } from './components/Toast';
+import { CouponMenu } from './components/CouponMenu';
+import { Redeem } from './components/Redeem';
+import { Upload } from './components/Upload';
+
 import IO from 'socket.io-client';
 
 //move to class file
@@ -48,6 +52,8 @@ class App extends Component {
       modalTitle: '',
       modalBody: '',
       loading: true,
+      activePane: '',
+      searchResult: '',
     }
 
     // get all data from the back end
@@ -67,7 +73,7 @@ class App extends Component {
     }
 
     // application socket
-    this.socket = IO.connect('http://localhost:3000');
+    this.socket = IO.connect('ws://localhost:3001', {transports: ['websocket']});
 
     // handling socket communication
     this.socket.on('sync-lists', () => {
@@ -136,9 +142,14 @@ class App extends Component {
     });
   }
   findVoucher = () => {
-    (this.state.list.length > 0) ? 
-      this.serialSearch() : 
-      alert('no data has been loaded');
+    if(this.state.list.length > 0){ 
+      this.serialSearch()
+    }else{
+      this.setState({
+        searchResult: 'error',
+      })
+      this.showToast('No data has been uploaded to the database.');
+    }
   }
   //search functions should be in a threadworker or something
   serialSearch = () => {
@@ -156,8 +167,11 @@ class App extends Component {
       for(let k = 0; k < list.serials.length; k++){
         let serial = list.serials[k].id;
         if (serial === key){
-          if(list.serials[k].redeemed){ 
-            alert('this voucher has been previously redeemed.');
+          if(list.serials[k].redeemed){
+            this.setState({
+              searchResult: 'error',
+            })
+            this.showToast('This voucher has been previously redeemed.');
             keyFound = true; 
             break; 
           }else if(!list.serials[k].redeemed){
@@ -170,14 +184,16 @@ class App extends Component {
             this.setState({
               searchKey: '',
             });
-            document.getElementById('redeem-modal').classList.remove('active');
             break;
           }
         }
       }
     }
     if(!keyFound){
-      alert('this voucher is invalid.')
+      this.setState({
+        searchResult: 'error',
+      })
+      this.showToast('This voucher is not valid.');
     }else if (keyFound && keyValid) this.updateState(tempList);
     this.setState({ searchKey: '', }); 
     document.getElementById('search-key-input').value = '';
@@ -191,7 +207,10 @@ class App extends Component {
       redeemQty: list.redeemQty
     }
     Axios.post('api/updateData', newList).then(() => {
-      this.showToast();
+      this.setState({
+        searchResult: 'success'
+      })
+      this.showToast('This voucher is valid!');
       this.socket.emit('update-data');
     });
   }
@@ -212,8 +231,9 @@ class App extends Component {
       elements[i].classList.remove('active');
     }
   }
-  showToast = () => {
+  showToast = (msg) => {
     let toast = document.getElementById('notify-toast');
+    toast.innerHTML = '<h2>' + msg + '</h2>';
     toast.classList.remove('d-hide');
     toast.classList.add('show');
     setTimeout(function(){ 
@@ -221,30 +241,88 @@ class App extends Component {
       toast.classList.add('d-hide'); 
     }, 3000);
   }
+  redeemClicked = () => {
+    this.setState({
+      activePane: 'redeem'
+    });
+  }
+  uploadClicked = () => {
+    this.setState({
+      activePane: 'upload'
+    });
+  }
+  createClicked = () => {
+    this.setState({
+      activePane: 'create'
+    });
+  }
   render() {
-    return (
-      <div className='container'>
-        <div className='panel columns'>
-          <div className='column col-12 text-center' style={{'marginTop': '5em'}}>
-            <h1>Ragged Mountain Resort Voucher Redemption Applicaton</h1>
-            <p>To redeem a voucher, select the button below. When prompted, scan the barcode into the provided text field and hit search.</p>
-          </div>
-        </div>
-        {/*<button className='btn btn-primary' id='upload-button' onClick={ event => document.getElementById('upload-modal').classList.add('active') }>Upload List</button>*/}
-        <div className='columns hero bg-dark text-center' style={{'marginTop': '10em'}}>
-          <div className='hero-body'>
-            <div className='columns'>
-              <div className='column col-12 col-mx-auto'>
-                <button className='btn btn-success' id='redeem-button' onClick={ event => document.getElementById('redeem-modal').classList.add('active') } style={{'padding': '2em 5em', 'height': 'auto'}}>Redeem Voucher</button>
+    if(this.state.activePane === ''){
+      return(
+        <div className='container'>
+          <div className='columns'>
+            <div className='column col-1'>
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} />
+            </div>
+            <div className='column col-10'>
+              <div className='columns'>
+                <div className='column col-12 text-center' style={{'marginTop': '5em'}}>
+                  <h1>CoupON</h1>
+                  <div className='columns'>
+                    <div className='column col-6 col-mx-auto text-center'>
+                      <p>Welcome to CoupON -- the online, coupon redemption and management utility! To get started, open the menu at the left and select an option.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          <Toast />
+          <Toast searchResult={this.state.searchResult} />
         </div>
-        <UploadModal loadData={this.loadData} closeModal={this.closeModal} />
-        <RedeemModal updateSearchKey={this.updateSearchKey} findVoucher={this.findVoucher} closeModal={this.closeModal} />
-      </div>
-    );
+      );
+    }else if(this.state.activePane === 'redeem'){
+      return(
+        <div className='container'>
+          <div className='columns'>
+            <div className='column col-1'>
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} />
+            </div>
+            <div className='column col-10'>
+              <Redeem updateSearchKey={this.updateSearchKey} findVoucher={this.findVoucher} closeModal={this.closeModal} />
+            </div>
+          </div>
+          <Toast searchResult={this.state.searchResult} />
+        </div>
+      );
+    }else if(this.state.activePane === 'upload'){
+      return(
+        <div className='container'>
+          <div className='columns'>
+            <div className='column col-1'>
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} />
+            </div>
+            <div className='column col-10'>
+              <Upload />
+            </div>
+          </div>
+          <Toast searchResult={this.state.searchResult} />
+        </div>
+      );
+    }/*else if(this.state.activePane === 'create'){
+      return(
+        <div className='container'>
+          <div className='columns'>
+            <div className='column col-1'>
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} />
+            </div>
+            <div className='column col-10'>
+              <h2>Create list</h2>
+            </div>
+          </div>
+          <Toast searchResult={this.state.searchResult} />
+        </div>
+      );
+    }*/
   }
 }
 

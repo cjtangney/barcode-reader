@@ -1,11 +1,6 @@
 import React, { Component } from 'react';
 
 class UploadModal extends Component {
-	closeModal = (e) => {
-		e.preventDefault();
-		let modal = document.getElementById('upload-modal');
-  	modal.classList.remove('active');
-	}
 	render(){
 		return(
 			<div className='modal' id='upload-modal'>
@@ -39,11 +34,6 @@ class UploadModal extends Component {
 }
 
 class RedeemModal extends Component {
-	closeModal = (e) => {
-		e.preventDefault();
-		let modal = document.getElementById('redeem-modal');
-  	modal.classList.remove('active');
-	}
 	render(){
 		return(
 			<div className='modal modal-lg' id='redeem-modal'>

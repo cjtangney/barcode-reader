@@ -26,6 +26,47 @@
 	letter-spacing: 0.4rem
 }
 
+.advanced-query{
+	padding-top: 1rem;
+	max-height: 0;
+	overflow: hidden;
+}
+
+.advanced-query.open{
+	max-height: 500rem;
+}
+
+a.cumulative{
+	color: #A7A7A7;
+	text-decoration: none;
+	cursor: pointer;
+	border: .05rem solid #A7A7A7;
+	border-radius: 0.1rem;
+	padding: 0.25rem 0.4rem;
+}
+
+#icon-cumulative{
+	display: inline-block;
+	width: auto;
+	height: auto;
+	line-height: 0;
+	font-size: 0.8rem;
+	border: none;
+	margin-left: 0.4rem;
+	transform: translateY(-10%);
+}
+
+#icon-cumulative:active{
+	border-color: #A7A7A7;
+	background-color: #A7A7A7;
+	color: #FFF;
+}
+
+#icon-cumulative:hover,
+#icon-cumulative:focus{
+	border-color: #3b4351;
+}
+
 .btn-expand{
 	border-color: #A7A7A7;
 	color: #A7A7A7;

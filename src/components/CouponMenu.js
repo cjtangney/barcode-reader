@@ -20,6 +20,9 @@ class CouponMenu extends Component {
             <li className='nav-item'>
               <a href='#' onClick={this.props.createClicked}>Create List</a>
             </li>
+            <li className='nav-item'>
+              <a href='#' onClick={this.props.viewClicked}>View Coupon Information</a>
+            </li>
           </ul>
         </div>
 

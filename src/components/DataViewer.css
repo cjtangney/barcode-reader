@@ -1,0 +1,43 @@
+.list-info{
+	margin-bottom: 1rem;
+	padding: 1rem;
+}
+
+.coupon-details{
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+}
+
+.coupon-info-name{
+	display: inline-block;
+	font-size: 2.2rem;
+	color: #5F5F5F;
+	letter-spacing: 0.1rem
+}
+
+.coupon-info-label{
+	font-size: 1rem;
+}
+
+.coupon-info-text{
+	display: inline-block;
+	font-size: 2.2rem;
+	color: #5F5F5F;
+	letter-spacing: 0.4rem
+}
+
+.btn-expand{
+	border-color: #A7A7A7;
+	color: #A7A7A7;
+}
+
+.btn-expand:active{
+	border-color: #A7A7A7;
+	background-color: #A7A7A7;
+	color: #FFF;
+}
+
+.btn-expand:hover,
+.btn-expand:focus{
+	border-color: #3b4351;
+}

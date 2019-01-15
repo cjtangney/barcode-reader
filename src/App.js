@@ -6,6 +6,7 @@ import { Toast } from './components/Toast';
 import { CouponMenu } from './components/CouponMenu';
 import { Redeem } from './components/Redeem';
 import { Upload } from './components/Upload';
+import { DataViewer } from './components/DataViewer';
 
 import IO from 'socket.io-client';
 
@@ -115,7 +116,7 @@ class App extends Component {
       });
 
       //add the new BarcodeList object to the state, stick the SerialNumber array in there
-      let tempList = new BarcodeList(name, fileName, serialList, 0, 0);
+      let tempList = new BarcodeList(name, fileName, serialList, serialList.length, 0);
       let listExists = false;
       let i;
       for(i = 0; i < this.state.list.length; i++){
@@ -256,13 +257,18 @@ class App extends Component {
       activePane: 'create'
     });
   }
+  viewClicked = () => {
+    this.setState({
+      activePane: 'view'
+    });
+  }
   render() {
     if(this.state.activePane === ''){
       return(
         <div className='container'>
           <div className='columns'>
             <div className='column col-1'>
-              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} />
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} />
             </div>
             <div className='column col-10'>
               <div className='columns'>
@@ -285,7 +291,7 @@ class App extends Component {
         <div className='container'>
           <div className='columns'>
             <div className='column col-1'>
-              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} />
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} />
             </div>
             <div className='column col-10'>
               <Redeem updateSearchKey={this.updateSearchKey} findVoucher={this.findVoucher} closeModal={this.closeModal} />
@@ -299,10 +305,24 @@ class App extends Component {
         <div className='container'>
           <div className='columns'>
             <div className='column col-1'>
-              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} />
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} />
             </div>
             <div className='column col-10'>
               <Upload />
+            </div>
+          </div>
+          <Toast searchResult={this.state.searchResult} />
+        </div>
+      );
+    }else if(this.state.activePane === 'view'){
+      return(
+        <div className='container'>
+          <div className='columns'>
+            <div className='column col-1'>
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} />
+            </div>
+            <div className='column col-10'>
+              <DataViewer couponData={this.state.list}/>
             </div>
           </div>
           <Toast searchResult={this.state.searchResult} />

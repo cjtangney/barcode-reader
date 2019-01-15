@@ -5,3 +5,6 @@
 .off-canvas-toggle{
 	top: 1em !important;
 }
+.off-canvas .off-canvas-overlay{
+	background: rgba(48,55,66,.75);
+}

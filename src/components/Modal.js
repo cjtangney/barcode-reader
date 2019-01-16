@@ -60,4 +60,41 @@ class RedeemModal extends Component {
 	}
 }
 
-export { UploadModal, RedeemModal };
+class ImportModal extends Component {
+	importData = (event) => {
+		if(this.props.data){
+			this.props.importData(this.props.data, document.getElementById('serial-list-name-input').value);
+			this.props.closeModal(event);
+		}else{
+			alert('no data to import!');
+			this.props.closeModal(event);
+			return;
+		}
+	}
+	render(){
+		return(
+			<div className='modal' id='import-modal'>
+			  <a href='#close' className='modal-overlay' aria-label='Close' id='modal-overlay' onClick={ event => this.props.closeModal(event) }></a>
+			  <div className='modal-container'>
+			    <div className='modal-header'>
+			      <a href='#close' className='btn btn-clear float-right' aria-label='Close' id='modal-close' onClick={ event => this.props.closeModal(event) }></a>
+			      <div className='modal-title h5'>Import Data</div>
+			    </div>
+			    <div className='modal-body'>
+			      <div className='content'>
+			      	<label className='text-center' htmlFor='serial-list-name-input'>
+	              Enter list name:
+	            </label>
+	            <input type='text' id='serial-list-name-input' style={{ width: '100%', marginBottom: '1em' }}/>
+			      </div>
+			    </div>
+			    <div className='modal-footer'>
+			    	<button className='btn' id='load-button' onClick={ event => {this.importData(event);} } style={{ 'marginTop': '1em' }}>Import List</button>
+			    </div>
+			  </div>
+			</div>
+		);
+	}
+}
+
+export { UploadModal, RedeemModal, ImportModal };

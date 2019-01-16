@@ -7,7 +7,7 @@ class Redeem extends Component {
       <div>
         <div className='columns'>
           <div className='column col-12 text-center' style={{'marginTop': '5em'}}>
-            <h1>Welcome to the CoupON Redemption Module</h1>
+            <h1>CoupON Redemption Module</h1>
             <div className='columns'>
               <div className='column col-6 col-mx-auto text-center'>
                 <p>Validating coupons has never been easier, thanks to CoupON. To validate a coupon, start by selecting the button below. When prompted, scan the coupon's code into the text field, and click search. CoupON will then automatically locate and redeem the coupon, ensuring that double-usage on coupons is a thing of the past!</p>

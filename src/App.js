@@ -7,6 +7,7 @@ import { CouponMenu } from './components/CouponMenu';
 import { Redeem } from './components/Redeem';
 import { Upload } from './components/Upload';
 import { DataViewer } from './components/DataViewer';
+import { SerialGen } from './components/SerialGen';
 
 import IO from 'socket.io-client';
 
@@ -120,7 +121,7 @@ class App extends Component {
       let listExists = false;
       let i;
       for(i = 0; i < this.state.list.length; i++){
-        if(tempList.fileName === this.state.list[i].fileName){ 
+        if((tempList.fileName === this.state.list[i].fileName)&&(tempList.name === this.state.list[i].name)){ 
           alert('this list exists already');
           document.getElementById('serial-list-name-input').value = '';
           listExists = true;
@@ -136,6 +137,35 @@ class App extends Component {
         this.saveState(tempList);
       }
     }
+  }
+  importData = (data, name) => {
+    if(name){
+      let serialList = [];
+      data.forEach(function(record){
+        serialList.push(new SerialNumber(record, false, ''));
+      });
+
+      //add the new BarcodeList object to the state, stick the SerialNumber array in there
+      let tempList = new BarcodeList(name, name+'.csv', serialList, serialList.length, 0);
+      let listExists = false;
+      let i;
+      for(i = 0; i < this.state.list.length; i++){
+        if(tempList.name === this.state.list[i].name){ 
+          alert('this list exists already');
+          document.getElementById('serial-list-name-input').value = '';
+          listExists = true;
+          return;
+        }
+      }
+      if(!listExists){
+        document.getElementById('serial-list-name-input').value = '';
+        let newList = this.state.list.concat(tempList);
+        this.setState({
+          list: newList,
+        });
+        this.saveState(tempList);
+      }
+    }else{ alert('a list name is required!') }
   }
   updateSearchKey = (key) => {
     this.setState({
@@ -262,13 +292,18 @@ class App extends Component {
       activePane: 'view'
     });
   }
+  createClicked = () => {
+    this.setState({
+      activePane: 'create'
+    });
+  }
   render() {
     if(this.state.activePane === ''){
       return(
         <div className='container'>
           <div className='columns'>
             <div className='column col-1'>
-              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} />
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} createClicked={this.createClicked} />
             </div>
             <div className='column col-10'>
               <div className='columns'>
@@ -291,7 +326,7 @@ class App extends Component {
         <div className='container'>
           <div className='columns'>
             <div className='column col-1'>
-              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} />
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} createClicked={this.createClicked} />
             </div>
             <div className='column col-10'>
               <Redeem updateSearchKey={this.updateSearchKey} findVoucher={this.findVoucher} closeModal={this.closeModal} />
@@ -305,7 +340,7 @@ class App extends Component {
         <div className='container'>
           <div className='columns'>
             <div className='column col-1'>
-              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} />
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} createClicked={this.createClicked} />
             </div>
             <div className='column col-10'>
               <Upload />
@@ -319,7 +354,7 @@ class App extends Component {
         <div className='container'>
           <div className='columns'>
             <div className='column col-1'>
-              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} />
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} createClicked={this.createClicked} />
             </div>
             <div className='column col-10'>
               <DataViewer couponData={this.state.list}/>
@@ -328,21 +363,21 @@ class App extends Component {
           <Toast searchResult={this.state.searchResult} />
         </div>
       );
-    }/*else if(this.state.activePane === 'create'){
+    }else if(this.state.activePane === 'create'){
       return(
         <div className='container'>
           <div className='columns'>
             <div className='column col-1'>
-              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} />
+              <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} createClicked={this.createClicked} />
             </div>
             <div className='column col-10'>
-              <h2>Create list</h2>
+              <SerialGen closeModal={this.closeModal} importData={this.importData} />
             </div>
           </div>
           <Toast searchResult={this.state.searchResult} />
         </div>
       );
-    }*/
+    }
   }
 }
 

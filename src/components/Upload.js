@@ -19,12 +19,12 @@ class Upload extends Component {
           <div className='hero-body'>
             <div className='columns'>
               <div className='column col-12 col-mx-auto'>
-                <button className='btn btn-primary' id='upload-button' onClick={ event => document.getElementById('upload-modal').classList.add('active') } style={{'padding': '2em 5em', 'height': 'auto'}}>Upload List</button>
+                <button className='btn btn-primary disabled' id='upload-button' onClick={ event => document.getElementById('upload-modal').classList.add('active') } style={{'padding': '2em 5em', 'height': 'auto'}}>Upload List</button>
               </div>
             </div>
           </div>
         </div>
-        <UploadModal loadData={this.loadData} closeModal={this.props.closeModal} />
+        <UploadModal loadData={this.props.loadData} closeModal={this.props.closeModal} />
       </div>
     );
   }

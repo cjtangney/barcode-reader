@@ -27,13 +27,29 @@
 }
 
 .advanced-query{
-	padding-top: 1rem;
+	padding-top: 0;
 	max-height: 0;
 	overflow: hidden;
 }
 
+.advanced-query-output{
+	margin-top: 1rem;
+	max-height: 0;
+	overflow: hidden;
+	display: none;
+}
+
 .advanced-query.open{
+	padding-top: 1rem;
+	transition: max-height 3s;
 	max-height: 500rem;
+}
+
+.advanced-query-output.open{
+	transition: max-height 3s;
+	max-height: 15rem;
+	display: block;
+	overflow-y: auto;
 }
 
 a.cumulative{
@@ -43,6 +59,28 @@ a.cumulative{
 	border: .05rem solid #A7A7A7;
 	border-radius: 0.1rem;
 	padding: 0.25rem 0.4rem;
+}
+
+#querymain{
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+	visibility: hidden;
+}
+
+#querymain.open{
+	visibility: visible;
+}
+
+#cumulative-query-results{
+	max-height: 0;
+	display: none;
+}
+
+#cumulative-query-results.open{
+	transition: max-height 3s;
+	max-height: 15rem;
+	display: block;
+	overflow-y: auto;
 }
 
 #icon-cumulative{

@@ -343,7 +343,7 @@ class App extends Component {
               <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} createClicked={this.createClicked} />
             </div>
             <div className='column col-10'>
-              <Upload />
+              <Upload loadData={this.loadData} />
             </div>
           </div>
           <Toast searchResult={this.state.searchResult} />
@@ -357,7 +357,7 @@ class App extends Component {
               <CouponMenu redeemClicked={this.redeemClicked} uploadClicked={this.uploadClicked} createClicked={this.createClicked} viewClicked={this.viewClicked} createClicked={this.createClicked} />
             </div>
             <div className='column col-10'>
-              <DataViewer couponData={this.state.list}/>
+              <DataViewer couponData={this.state.list} closeModal={this.closeModal} />
             </div>
           </div>
           <Toast searchResult={this.state.searchResult} />

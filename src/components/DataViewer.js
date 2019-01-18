@@ -1,12 +1,66 @@
 import React, { Component } from 'react';
+import { DatePickerModal } from './Modal';
 
 import './DataViewer.css';
 
 class DataViewer extends Component {
+  constructor(props){
+    super(props);
+
+    this.state = {
+      redeemedList: <tr></tr>,
+    }
+  }
   getData = () => {
     console.log(this.props.couponData);
   }
+  getAllRedeemed = () => {
+    for(let i = 0; i < document.getElementsByClassName('advanced-query-output').length; i++){
+      document.getElementsByClassName('advanced-query-output')[i].classList.remove('open');
+    }
+    document.getElementById('cumulative-query-results').classList.toggle('open');
+    let redeemedList = [];
+    this.props.couponData.forEach((list) => {
+      list.serials.forEach((voucher) => {
+        if(voucher.redeemed){ 
+          redeemedList.push(
+            <tr key={voucher.id}>
+              <td>{list.name}</td>
+              <td>{voucher.id}</td>
+              <td>{voucher.dateRedeemed}</td>
+            </tr>
+          );
+        }
+      });
+    })
+    this.setState({
+      redeemedList: redeemedList
+    })
+  }
+  getRedeemed = (list) => {
+    for(let i = 0; i < document.getElementsByClassName('advanced-query-output').length; i++){
+      document.getElementsByClassName('advanced-query-output')[i].classList.remove('open');
+    }
+    document.getElementById(list._id+'result').classList.toggle('open');
+    let redeemedList = [];
+    list.serials.forEach((voucher) => {
+      if(voucher.redeemed){ 
+        redeemedList.push(
+          <tr key={voucher.id}>
+            <td>{voucher.id}</td>
+            <td>{voucher.dateRedeemed}</td>
+          </tr>
+        );
+      }
+    });
+    this.setState({
+      redeemedList: redeemedList
+    })
+  }
   openAdvancedQuery = (event, id) => {
+    this.setState({
+      redeemedList: <tr></tr>
+    });
     for(let i = 0; i < document.getElementsByClassName('advanced-query').length; i++){
       document.getElementsByClassName('advanced-query')[i].classList.remove('open');
     }
@@ -26,8 +80,22 @@ class DataViewer extends Component {
             <div className='columns'>
               <div className='column col-8 col-mx-auto text-center'>
                 <a className='cumulative' onClick={event => this.openAdvancedQuery(event, 'main')}><span className='coupon-info-label'>Cumulative Data View</span>&nbsp;<span id='icon-cumulative'><i className='icon icon-arrow-down'></i></span></a>
-                <div className='advanced-query' id={'querymain'}>
-                  <p>This feature will allow you to query information stored in all lists.</p>                  
+                <div className='advanced-query' id='querymain'>
+                  <p>This feature will allow you to query information stored in all lists.</p>
+                  <button className='btn mx-1' onClick={ event => this.getAllRedeemed() }>View all redeemed</button>
+                  <button className='btn mx-1' onClick={ event => document.getElementById('date-modal').classList.add('active') }>View by date</button>
+                  <div id='cumulative-query-results' className='panel advanced-query-output'>
+                    <table className='table text-center'>
+                      <tbody>
+                        <tr>
+                          <th>List</th>
+                          <th>Voucher ID</th>
+                          <th>Date Redeemed</th>
+                        </tr>
+                        {this.state.redeemedList}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -55,7 +123,18 @@ class DataViewer extends Component {
                       <div className='advanced-query text-left' id={'query'+list._id}>
                         <span className='coupon-info-label'>Advanced Data Selector</span>
                         <p>Use the advanced data selector to view more specific information pertaining to a given list.</p>
-
+                        <button className='btn' onClick={event => this.getRedeemed(list)}>View all redeemed</button>
+                        <div id={list._id+'result'} className='panel advanced-query-output'>
+                          <table className='table text-center'>
+                            <tbody>
+                              <tr>
+                                <th>Voucher ID</th>
+                                <th>Date Redeemed</th>
+                              </tr>
+                              {this.state.redeemedList}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -64,6 +143,7 @@ class DataViewer extends Component {
             )}
           </div>
         </div>
+        <DatePickerModal closeModal={this.props.closeModal} />
       </div>
     );
   }

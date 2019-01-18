@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import DayPicker from 'react-day-picker';
+import 'react-day-picker/lib/style.css';
 
 class UploadModal extends Component {
 	render(){
@@ -97,4 +99,42 @@ class ImportModal extends Component {
 	}
 }
 
-export { UploadModal, RedeemModal, ImportModal };
+class DatePickerModal extends Component {
+	constructor(props){
+		super(props);
+
+		this.state = {
+			selectedDay: null,
+		}
+	}
+	handleDayClick = (day,{selected}) => {
+		this.setState({
+      selectedDay: selected ? undefined : day,
+    });
+	}
+	render(){
+		return(
+			<div className='modal' id='date-modal'>
+			  <a href='#close' className='modal-overlay' aria-label='Close' id='modal-overlay' onClick={ event => this.props.closeModal(event) }></a>
+			  <div className='modal-container'>
+			    <div className='modal-header'>
+			      <a href='#close' className='btn btn-clear float-right' aria-label='Close' id='modal-close' onClick={ event => this.props.closeModal(event) }></a>
+			      <div className='modal-title h5'>Select a date</div>
+			    </div>
+			    <div className='modal-body'>
+			      <div className='content text-center'>
+			      	<DayPicker fixedWeeks 
+			      	todayButton="Go to Today" 
+			      	onDayClick={this.handleDayClick}/>
+			      </div>
+			    </div>
+			    <div className='modal-footer'>
+			    	<button className='btn' id='load-button' onClick={ event => this.state.selectedDay ? console.log(this.state.selectedDay) : alert('select a date') } style={{ 'marginTop': '1em' }}>Find</button>
+			    </div>
+			  </div>
+			</div>
+		);
+	}
+}
+
+export { UploadModal, RedeemModal, ImportModal, DatePickerModal };
